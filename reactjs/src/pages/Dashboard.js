@@ -162,6 +162,9 @@ function Dashboard() {
 					</div>
 				</div>
 			</header>
+			<footer className="footer">
+	<p>MovieVault • Developed by Stephanie Olivares | SOLINYC LLC</p>
+</footer>
 		</div>
 	);
 }

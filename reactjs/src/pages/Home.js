@@ -25,6 +25,9 @@ function Home() {
 					</div>
 				</section>
 			</header>
+			<footer className="footer">
+	<p>MovieVault • Developed by Stephanie Olivares | SOLINYC LLC</p>
+</footer>
 		</div>
 	);
 }
