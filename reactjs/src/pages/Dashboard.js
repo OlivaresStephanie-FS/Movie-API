@@ -38,7 +38,6 @@ function Dashboard() {
 			await fetch(`${API_BASE}/movies`)
 				.then((res) => res.json())
 				.then((data) => {
-					console.log({ data });
 					setMovies(data);
 				});
 		} catch (error) {
@@ -78,8 +77,6 @@ function Dashboard() {
 	};
 
 	const handleInputChanges = (event) => {
-		event.persist();
-
 		setValues((values) => ({
 			...values,
 			[event.target.name]: event.target.value,
@@ -89,56 +86,81 @@ function Dashboard() {
 	return (
 		<div className="App">
 			<header className="App-header">
-				<h1>Movie Watchlist</h1>
+				<nav className="nav">
+					<strong>MovieVault</strong>
 
-				<Link to="/">Home</Link>
+					<div className="actions">
+						<Link to="/">Home</Link>
+					</div>
+				</nav>
 
-				{loading && <p>Loading...</p>}
-				{error && <p>{error}</p>}
+				<div className="dashboard-grid">
+					<div className="form-card">
+						<h2>Add Movie</h2>
 
-				<ul>
-					{movies.map((movie) => (
-						<li key={movie._id}>
-							<Link to={`/movies/${movie._id}`}>
-								{movie.title} — {movie.genre} — {movie.rating}
-							</Link>
-						</li>
-					))}
-				</ul>
+						<form onSubmit={(event) => handleSubmit(event)}>
+							<label>
+								Movie Title
+								<input
+									type="text"
+									name="title"
+									value={values.title}
+									onChange={handleInputChanges}
+								/>
+							</label>
 
-				<form onSubmit={(event) => handleSubmit(event)}>
-					<label>
-						Title:
-						<input
-							type="text"
-							name="title"
-							value={values.title}
-							onChange={handleInputChanges}
-						/>
-					</label>
+							<label>
+								Genre
+								<input
+									type="text"
+									name="genre"
+									value={values.genre}
+									onChange={handleInputChanges}
+								/>
+							</label>
 
-					<label>
-						Genre:
-						<input
-							type="text"
-							name="genre"
-							value={values.genre}
-							onChange={handleInputChanges}
-						/>
-					</label>
+							<label>
+								Rating
+								<input
+									type="text"
+									name="rating"
+									value={values.rating}
+									onChange={handleInputChanges}
+								/>
+							</label>
 
-					<label>
-						Rating:
-						<input
-							type="text"
-							name="rating"
-							value={values.rating}
-							onChange={handleInputChanges}
-						/>
-					</label>
+							<input type="submit" value="Add Movie" />
+						</form>
+					</div>
 
-					<input type="submit" value="Add Movie" />
-				</form>
+					<div>
+						<h2>Movie Collection</h2>
+
+						{loading && <p>Loading...</p>}
+						{error && <p>{error}</p>}
+
+						<ul className="movie-list">
+							{movies.map((movie) => (
+								<li key={movie._id}>
+									<div className="movie-card">
+										<Link to={`/movies/${movie._id}`}>
+											<h3>{movie.title}</h3>
+										</Link>
+
+										<div className="movie-meta">
+											<span className="badge">
+												{movie.genre}
+											</span>
+											<span className="badge">
+												Rating: {movie.rating}
+											</span>
+										</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
 			</header>
 		</div>
 	);

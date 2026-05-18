@@ -4,161 +4,177 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 
 function Movie() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
 
-  const [values, setValues] = useState({
-    title: "",
-    genre: "",
-    rating: "",
-  });
+	const [values, setValues] = useState({
+		title: "",
+		genre: "",
+		rating: "",
+	});
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+	const { id } = useParams();
+	const navigate = useNavigate();
 
-  const API_BASE =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8000/api/v1"
-      : "/api/v1";
+	const API_BASE =
+		process.env.NODE_ENV === "development"
+			? "http://localhost:8000/api/v1"
+			: "/api/v1";
 
-  useEffect(() => {
-    let ignore = false;
+	useEffect(() => {
+		let ignore = false;
 
-    if (!ignore) {
-      getMovie();
-    }
+		if (!ignore) {
+			getMovie();
+		}
 
-    return () => {
-      ignore = true;
-    };
-  }, []);
+		return () => {
+			ignore = true;
+		};
+	}, []);
 
-  const getMovie = async () => {
-    setLoading(true);
+	const getMovie = async () => {
+		setLoading(true);
 
-    try {
-      await fetch(`${API_BASE}/movies/${id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log({ data });
+		try {
+			await fetch(`${API_BASE}/movies/${id}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setValues({
+						title: data.title,
+						genre: data.genre,
+						rating: data.rating,
+					});
+				});
+		} catch (error) {
+			setError(error.message || "Unexpected Error");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          setValues({
-            title: data.title,
-            genre: data.genre,
-            rating: data.rating,
-          });
-        });
-    } catch (error) {
-      setError(error.message || "Unexpected Error");
-    } finally {
-      setLoading(false);
-    }
-  };
+	const deleteMovie = async () => {
+		try {
+			await fetch(`${API_BASE}/movies/${id}`, {
+				method: "DELETE",
+			})
+				.then((res) => res.json())
+				.then(() => {
+					navigate("/dashboard", { replace: true });
+				});
+		} catch (error) {
+			setError(error.message || "Unexpected Error");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const deleteMovie = async () => {
-    try {
-      await fetch(`${API_BASE}/movies/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log({ data });
-          navigate("/dashboard", { replace: true });
-        });
-    } catch (error) {
-      setError(error.message || "Unexpected Error");
-    } finally {
-      setLoading(false);
-    }
-  };
+	const updateMovie = async () => {
+		try {
+			await fetch(`${API_BASE}/movies/${id}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(values),
+			})
+				.then((res) => res.json())
+				.then((data) => {
+					setValues({
+						title: data.title,
+						genre: data.genre,
+						rating: data.rating,
+					});
+				});
+		} catch (error) {
+			setError(error.message || "Unexpected Error");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const updateMovie = async () => {
-    try {
-      await fetch(`${API_BASE}/movies/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log({ data });
-        });
-    } catch (error) {
-      setError(error.message || "Unexpected Error");
-    } finally {
-      setLoading(false);
-    }
-  };
+	const handleSubmit = (event) => {
+		event.preventDefault();
+		updateMovie();
+	};
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    updateMovie();
-  };
+	const handleInputChanges = (event) => {
+		setValues((values) => ({
+			...values,
+			[event.target.name]: event.target.value,
+		}));
+	};
 
-  const handleInputChanges = (event) => {
-    event.persist();
+	return (
+		<div className="App">
+			<header className="App-header">
+				<nav className="nav">
+					<strong>MovieVault</strong>
 
-    setValues((values) => ({
-      ...values,
-      [event.target.name]: event.target.value,
-    }));
-  };
+					<div className="actions">
+						<Link to="/">Home</Link>
+						<Link to="/dashboard">Dashboard</Link>
+					</div>
+				</nav>
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Movie Details</h1>
+				<section className="detail-card">
+					<h1>Movie Details</h1>
 
-        {loading && <p>Loading...</p>}
-        {error && <p>{error}</p>}
+					{loading && <p>Loading...</p>}
+					{error && <p>{error}</p>}
 
-        <h5>{values.title}</h5>
-        <p>{values.genre}</p>
-        <p>{values.rating}</p>
+					<h2>{values.title}</h2>
 
-        <button onClick={() => deleteMovie()}>Delete Movie</button>
+					<div className="movie-meta">
+						<span className="badge">{values.genre}</span>
+						<span className="badge">Rating: {values.rating}</span>
+					</div>
 
-        <Link to="/">Home</Link>
-        <Link to="/dashboard">Dashboard</Link>
+					<div className="actions">
+						<button
+							className="danger"
+							onClick={() => deleteMovie()}>
+							Delete Movie
+						</button>
+					</div>
 
-        <form onSubmit={(event) => handleSubmit(event)}>
-          <label>
-            Title:
-            <input
-              type="text"
-              name="title"
-              value={values.title}
-              onChange={handleInputChanges}
-            />
-          </label>
+					<form onSubmit={(event) => handleSubmit(event)}>
+						<label>
+							Movie Title
+							<input
+								type="text"
+								name="title"
+								value={values.title}
+								onChange={handleInputChanges}
+							/>
+						</label>
 
-          <label>
-            Genre:
-            <input
-              type="text"
-              name="genre"
-              value={values.genre}
-              onChange={handleInputChanges}
-            />
-          </label>
+						<label>
+							Genre
+							<input
+								type="text"
+								name="genre"
+								value={values.genre}
+								onChange={handleInputChanges}
+							/>
+						</label>
 
-          <label>
-            Rating:
-            <input
-              type="text"
-              name="rating"
-              value={values.rating}
-              onChange={handleInputChanges}
-            />
-          </label>
+						<label>
+							Rating
+							<input
+								type="text"
+								name="rating"
+								value={values.rating}
+								onChange={handleInputChanges}
+							/>
+						</label>
 
-          <input type="submit" value="Update Movie" />
-        </form>
-      </header>
-    </div>
-  );
+						<input type="submit" value="Update Movie" />
+					</form>
+				</section>
+			</header>
+		</div>
+	);
 }
 
 export default Movie;

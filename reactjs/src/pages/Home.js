@@ -3,19 +3,30 @@ import { Link } from "react-router-dom";
 import "../App.css";
 
 function Home() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Movie Watchlist</h1>
+	return (
+		<div className="App">
+			<header className="App-header">
+				<nav className="nav">
+					<strong>MovieVault</strong>
+					<Link to="/dashboard">Dashboard</Link>
+				</nav>
 
-        <p>
-          Keep track of your favorite movies, genres, and ratings.
-        </p>
+				<section className="hero">
+					<div className="hero-card">
+						<h1>MovieVault</h1>
+						<p>
+							A movie watchlist app built with React,
+							Express, MongoDB, and a RESTful CRUD API.
+						</p>
 
-        <Link to="/dashboard">View Dashboard</Link>
-      </header>
-    </div>
-  );
+						<Link className="btn" to="/dashboard">
+							View Movie Dashboard
+						</Link>
+					</div>
+				</section>
+			</header>
+		</div>
+	);
 }
 
 export default Home;
