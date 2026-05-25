@@ -57,7 +57,7 @@ export default function MovieScreen({ route, navigation }) {
 			});
 
 			const data = await response.json();
-			console.log(data);
+			
 
 			navigation.goBack();
 		} catch (error) {

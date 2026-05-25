@@ -28,7 +28,7 @@ export default function DashboardScreen({ navigation }) {
 		try {
 			const response = await fetch(`${API_BASE}movies`);
 			const data = await response.json();
-			console.log(data);
+			
 			setMovies(data);
 		} catch (error) {
 			setError(error.message || "Failed to fetch movies");
@@ -52,7 +52,7 @@ export default function DashboardScreen({ navigation }) {
 			});
 
 			const newMovie = await response.json();
-			console.log(newMovie);
+		
 
 			setMovies((currentMovies) => [newMovie, ...currentMovies]);
 
