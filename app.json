@@ -1,24 +1,28 @@
 {
   "expo": {
-    "name": "movievault-mobile",
-    "slug": "movievault-mobile",
+    "name": "MovieVault",
+    "slug": "movievault",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+
+    "icon": "./assets/apple-touch-icon.png",
+
     "userInterfaceStyle": "light",
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/apple-touch-icon.png"
     },
+
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/android-chrome-512x512.png",
+        "backgroundColor": "#12061f"
       }
     },
+
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon-32x32.png"
     }
   }
 }
