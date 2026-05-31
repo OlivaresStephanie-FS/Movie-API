@@ -1,7 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import styles from "./Appstyles";
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ route, navigation }) {
+	const {token} = route.params;
 	return (
 		<View style={styles.container}>
 			<View style={styles.screenContent}>
@@ -17,7 +18,7 @@ export default function HomeScreen({ navigation }) {
 
 					<Pressable
 						style={styles.button}
-						onPress={() => navigation.navigate("Dashboard")}>
+						onPress={() => navigation.navigate("Dashboard", { token })}>
 						<Text style={styles.buttonText}>Open Dashboard</Text>
 					</Pressable>
 				</View>

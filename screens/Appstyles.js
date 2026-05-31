@@ -40,6 +40,14 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 	},
 
+	linkText: {
+		color: "#b794f4",
+		textAlign: "center",
+		marginTop: 18,
+		fontSize: 15,
+		fontWeight: "600",
+	},
+
 	input: {
 		backgroundColor: "#1b102b",
 		borderWidth: 1,
@@ -106,6 +114,14 @@ const styles = StyleSheet.create({
 		marginTop: 30,
 		marginBottom: 20,
 		fontSize: 13,
+	},
+
+	logoutButton: {
+		backgroundColor: "#b83250",
+		padding: 12,
+		borderRadius: 14,
+		alignItems: "center",
+		marginBottom: 18,
 	},
 });
 

@@ -13,9 +13,8 @@ const API_BASE =
 	"https://movies-api-dwa-assignment-1b9df33548df.herokuapp.com/api/v1/";
 
 export default function MovieScreen({ route, navigation }) {
-	const { movieId } = route.params;
+	const { movieId, token } = route.params;
 
-	const [movie, setMovie] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
@@ -27,14 +26,23 @@ export default function MovieScreen({ route, navigation }) {
 		setLoading(true);
 
 		try {
-			const response = await fetch(`${API_BASE}movies/${movieId}`);
+			const response = await fetch(`${API_BASE}movies/${movieId}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
 			const data = await response.json();
 
-			setMovie(data);
+			if (!response.ok) {
+				setError(data.message || "Failed to fetch movie");
+				return;
+			}
 
 			setTitle(data.title);
 			setGenre(data.genre);
 			setRating(data.rating);
+			setError(null);
 		} catch (error) {
 			setError(error.message || "Failed to fetch movie");
 		} finally {
@@ -48,6 +56,7 @@ export default function MovieScreen({ route, navigation }) {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
 					title,
@@ -57,8 +66,13 @@ export default function MovieScreen({ route, navigation }) {
 			});
 
 			const data = await response.json();
-			
 
+			if (!response.ok) {
+				setError(data.message || "Failed to update movie");
+				return;
+			}
+
+			setError(null);
 			navigation.goBack();
 		} catch (error) {
 			setError(error.message || "Failed to update movie");
@@ -67,11 +81,22 @@ export default function MovieScreen({ route, navigation }) {
 
 	const deleteMovie = async () => {
 		try {
-			await fetch(`${API_BASE}movies/${movieId}`, {
+			const response = await fetch(`${API_BASE}movies/${movieId}`, {
 				method: "DELETE",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
 
-			navigation.navigate("Dashboard");
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Failed to delete movie");
+				return;
+			}
+
+			setError(null);
+			navigation.navigate("Dashboard", { token });
 		} catch (error) {
 			setError(error.message || "Failed to delete movie");
 		}
@@ -130,11 +155,13 @@ export default function MovieScreen({ route, navigation }) {
 							styles.button,
 							{ backgroundColor: "#b83250", marginTop: 12 },
 						]}
-						onPress={deleteMovie}>
+						onPress={deleteMovie}
+					>
 						<Text style={styles.buttonText}>Delete Movie</Text>
 					</Pressable>
 				</View>
 			</View>
+
 			<Text style={styles.footer}>
 				Built by Stephanie Olivares | SOLINYC LLC
 			</Text>
