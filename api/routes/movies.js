@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Movie = require("../models/movie");
+const auth = require("../middleware/auth");
 
 // RESTFUL Endpoints
 // GET, POST, PATCH, DELETE
@@ -24,7 +25,7 @@ const getMovie = async (req, res, next) => {
 };
 
 // GET ALL
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const movies = await Movie.find();
     res.json(movies);
@@ -34,12 +35,12 @@ router.get("/", async (req, res) => {
 });
 
 // GET ONE
-router.get("/:id", getMovie, async (req, res) => {
+router.get("/:id", auth, getMovie, async (req, res) => {
   res.json(res.movie);
 });
 
 // POST CREATE
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const movie = new Movie({
     title: req.body.title,
     genre: req.body.genre,
@@ -55,7 +56,7 @@ router.post("/", async (req, res) => {
 });
 
 // PATCH UPDATE
-router.patch("/:id", getMovie, async (req, res) => {
+router.patch("/:id", auth, getMovie, async (req, res) => {
   if (req.body.title != null) {
     res.movie.title = req.body.title;
   }
@@ -77,7 +78,7 @@ router.patch("/:id", getMovie, async (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", getMovie, async (req, res) => {
+router.delete("/:id", auth, getMovie, async (req, res) => {
   try {
     await res.movie.deleteOne();
     res.json({ message: "Removed movie" });

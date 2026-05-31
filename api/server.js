@@ -13,6 +13,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 8000;
 
 const movieRouter = require("./routes/movies");
+const authRouter = require("./routes/auth");
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -29,6 +30,8 @@ db.once("open", () => {
 });
 
 // API Routes
+// API Routes
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/movies", movieRouter);
 
 // React Build Folder
