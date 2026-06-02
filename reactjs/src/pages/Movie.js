@@ -21,31 +21,39 @@ function Movie() {
 			? "http://localhost:8000/api/v1"
 			: "/api/v1";
 
-	useEffect(() => {
-		let ignore = false;
+	const token = localStorage.getItem("token");
 
-		if (!ignore) {
-			getMovie();
+	useEffect(() => {
+		if (!token) {
+			navigate("/login");
+			return;
 		}
 
-		return () => {
-			ignore = true;
-		};
+		getMovie();
 	}, []);
 
 	const getMovie = async () => {
 		setLoading(true);
 
 		try {
-			await fetch(`${API_BASE}/movies/${id}`)
-				.then((res) => res.json())
-				.then((data) => {
-					setValues({
-						title: data.title,
-						genre: data.genre,
-						rating: data.rating,
-					});
-				});
+			const response = await fetch(`${API_BASE}/movies/${id}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Unable to load movie");
+				return;
+			}
+
+			setValues({
+				title: data.title,
+				genre: data.genre,
+				rating: data.rating,
+			});
 		} catch (error) {
 			setError(error.message || "Unexpected Error");
 		} finally {
@@ -55,13 +63,21 @@ function Movie() {
 
 	const deleteMovie = async () => {
 		try {
-			await fetch(`${API_BASE}/movies/${id}`, {
+			const response = await fetch(`${API_BASE}/movies/${id}`, {
 				method: "DELETE",
-			})
-				.then((res) => res.json())
-				.then(() => {
-					navigate("/dashboard", { replace: true });
-				});
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Unable to delete movie");
+				return;
+			}
+
+			navigate("/dashboard", { replace: true });
 		} catch (error) {
 			setError(error.message || "Unexpected Error");
 		} finally {
@@ -71,26 +87,39 @@ function Movie() {
 
 	const updateMovie = async () => {
 		try {
-			await fetch(`${API_BASE}/movies/${id}`, {
+			const response = await fetch(`${API_BASE}/movies/${id}`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify(values),
-			})
-				.then((res) => res.json())
-				.then((data) => {
-					setValues({
-						title: data.title,
-						genre: data.genre,
-						rating: data.rating,
-					});
-				});
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Unable to update movie");
+				return;
+			}
+
+			setValues({
+				title: data.title,
+				genre: data.genre,
+				rating: data.rating,
+			});
+
+			setError(null);
 		} catch (error) {
 			setError(error.message || "Unexpected Error");
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const logout = () => {
+		localStorage.removeItem("token");
+		navigate("/login");
 	};
 
 	const handleSubmit = (event) => {
@@ -114,6 +143,9 @@ function Movie() {
 					<div className="actions">
 						<Link to="/">Home</Link>
 						<Link to="/dashboard">Dashboard</Link>
+						<button className="logout-btn" onClick={logout}>
+							Logout
+						</button>
 					</div>
 				</nav>
 
@@ -133,12 +165,13 @@ function Movie() {
 					<div className="actions">
 						<button
 							className="danger"
-							onClick={() => deleteMovie()}>
+							onClick={() => deleteMovie()}
+						>
 							Delete Movie
 						</button>
 					</div>
 
-					<form onSubmit={(event) => handleSubmit(event)}>
+					<form onSubmit={handleSubmit}>
 						<label>
 							Movie Title
 							<input
@@ -173,9 +206,13 @@ function Movie() {
 					</form>
 				</section>
 			</header>
+
 			<footer className="footer">
-	<p>MovieVault • Developed by Stephanie Olivares | SOLINYC LLC</p>
-</footer>
+				<p>
+					MovieVault • Developed by Stephanie Olivares |
+					SOLINYC LLC
+				</p>
+			</footer>
 		</div>
 	);
 }

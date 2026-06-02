@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import "../App.css";
 
 function Dashboard() {
+	const navigate = useNavigate();
+
 	const [movies, setMovies] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -19,27 +21,35 @@ function Dashboard() {
 			? "http://localhost:8000/api/v1"
 			: "/api/v1";
 
-	useEffect(() => {
-		let ignore = false;
+	const token = localStorage.getItem("token");
 
-		if (!ignore) {
-			getMovies();
+	useEffect(() => {
+		if (!token) {
+			navigate("/login");
+			return;
 		}
 
-		return () => {
-			ignore = true;
-		};
+		getMovies();
 	}, []);
 
 	const getMovies = async () => {
 		setLoading(true);
 
 		try {
-			await fetch(`${API_BASE}/movies`)
-				.then((res) => res.json())
-				.then((data) => {
-					setMovies(data);
-				});
+			const response = await fetch(`${API_BASE}/movies`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Unable to load movies");
+				return;
+			}
+
+			setMovies(data);
 		} catch (error) {
 			setError(error.message || "Unexpected Error");
 		} finally {
@@ -49,26 +59,40 @@ function Dashboard() {
 
 	const createMovie = async () => {
 		try {
-			await fetch(`${API_BASE}/movies`, {
+			const response = await fetch(`${API_BASE}/movies`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify(values),
-			}).then(() => {
-				setValues({
-					title: "",
-					genre: "",
-					rating: "",
-				});
-
-				getMovies();
 			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.message || "Unable to add movie");
+				return;
+			}
+
+			setValues({
+				title: "",
+				genre: "",
+				rating: "",
+			});
+
+			setMovies((currentMovies) => [data, ...currentMovies]);
+			setError(null);
 		} catch (error) {
 			setError(error.message || "Unexpected Error");
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const logout = () => {
+		localStorage.removeItem("token");
+		navigate("/login");
 	};
 
 	const handleSubmit = (event) => {
@@ -91,6 +115,9 @@ function Dashboard() {
 
 					<div className="actions">
 						<Link to="/">Home</Link>
+						<button className="logout-btn" onClick={logout}>
+							Logout
+						</button>
 					</div>
 				</nav>
 
@@ -98,7 +125,7 @@ function Dashboard() {
 					<div className="form-card">
 						<h2>Add Movie</h2>
 
-						<form onSubmit={(event) => handleSubmit(event)}>
+						<form onSubmit={handleSubmit}>
 							<label>
 								Movie Title
 								<input
@@ -140,6 +167,10 @@ function Dashboard() {
 						{error && <p>{error}</p>}
 
 						<ul className="movie-list">
+							{movies.length === 0 && !loading && (
+								<p>No movies added yet.</p>
+							)}
+
 							{movies.map((movie) => (
 								<li key={movie._id}>
 									<div className="movie-card">
@@ -162,9 +193,13 @@ function Dashboard() {
 					</div>
 				</div>
 			</header>
+
 			<footer className="footer">
-	<p>MovieVault • Developed by Stephanie Olivares | SOLINYC LLC</p>
-</footer>
+				<p>
+					MovieVault • Developed by Stephanie Olivares |
+					SOLINYC LLC
+				</p>
+			</footer>
 		</div>
 	);
 }
